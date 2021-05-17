@@ -1,4 +1,4 @@
-/* Copyright (c) 2013-2020, The Tor Project, Inc. */
+/* Copyright (c) 2013-2021, The Tor Project, Inc. */
 /* See LICENSE for licensing information */
 
 #include "core/or/or.h"
@@ -42,7 +42,7 @@
  * circuit scheduler. It was supposed to prioritize circuits across many
  * channels, but wasn't effective. It is preserved in scheduler_vanilla.c.
  *
- * [0]: http://www.robgjansen.com/publications/kist-sec2014.pdf
+ * [0]: https://www.robgjansen.com/publications/kist-sec2014.pdf
  *
  * Then we actually got around to implementing KIST for real. We decided to
  * modularize the scheduler so new ones can be implemented. You can find KIST
@@ -713,7 +713,7 @@ scheduler_bug_occurred(const channel_t *chan)
 
   if (chan != NULL) {
     const size_t outbuf_len =
-      buf_datalen(TO_CONN(BASE_CHAN_TO_TLS((channel_t *) chan)->conn)->outbuf);
+      buf_datalen(TO_CONN(CONST_BASE_CHAN_TO_TLS(chan)->conn)->outbuf);
     tor_snprintf(buf, sizeof(buf),
                  "Channel %" PRIu64 " in state %s and scheduler state %s."
                  " Num cells on cmux: %d. Connection outbuf len: %lu.",

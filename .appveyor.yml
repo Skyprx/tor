@@ -8,8 +8,6 @@ clone_depth: 50
 image:
   # Windows Server 2019
   - Visual Studio 2019
-  # Windows Server 2012 R2
-  - Visual Studio 2015
 
 environment:
   compiler: mingw
@@ -37,12 +35,6 @@ matrix:
       compiler_path: mingw32
       mingw_prefix: mingw-w64-i686
       hardening: --enable-all-bugs-are-fatal
-    - image: Visual Studio 2015
-      target: x86_64-w64-mingw32
-      compiler_path: mingw64
-      mingw_prefix: mingw-w64-x86_64
-      # hardening doesn't work with mingw-w64-x86_64-gcc, because it's gcc 8
-      hardening: --disable-gcc-hardening
 
 install:
 - ps: >-
@@ -65,6 +57,8 @@ install:
      # All installed library dlls must be copied to the test and app
      # directories, before running tor's tests. (See below.)
      #>
+    Execute-Command "C:\msys64\usr\bin\pacman" -Syu --verbose --noconfirm pacman ;
+- ps: >-
     Execute-Command "C:\msys64\usr\bin\pacman" -Sy --verbose --needed --noconfirm ${env:mingw_prefix}-libevent ${env:mingw_prefix}-openssl ${env:mingw_prefix}-pkg-config ${env:mingw_prefix}-xz ${env:mingw_prefix}-zstd ;
 
 build_script:
@@ -85,7 +79,7 @@ build_script:
              # mingw zstd doesn't come with a pkg-config file, so we manually
              # configure its flags. liblzma just works.
              #>
-            Execute-Bash "ZSTD_CFLAGS='-L/${env:compiler_path}/include' ZSTD_LIBS='-L/${env:compiler_path}/lib -lzstd' ../configure --prefix=/${env:compiler_path} --build=${env:target} --host=${env:target} --with-openssl-dir=/${env:compiler_path} --disable-asciidoc --enable-fatal-warnings ${env:hardening}"
+            Execute-Bash "ZSTD_CFLAGS='-L/${env:compiler_path}/include' ZSTD_LIBS='-L/${env:compiler_path}/lib -lzstd' ../configure --prefix=/${env:compiler_path} --build=${env:target} --host=${env:target} --with-openssl-dir=/${env:compiler_path} --disable-asciidoc --enable-fatal-warnings ${env:hardening} CFLAGS='-D__USE_MINGW_ANSI_STDIO=0'"
             Execute-Bash "V=1 make -k -j2"
             Execute-Bash "V=1 make -k -j2 install"
      }
